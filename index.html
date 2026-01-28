@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday, My Love!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:ital,wght@0,400;1,600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff4d6d;
+            --soft-pink: #fff0f3;
+            --orbit-radius: 180px; /* How far the pics are from center */
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, #fff0f3, #ffccd5);
+            font-family: 'Playfair Display', serif;
+            overflow: hidden; display: flex; justify-content: center; align-items: center;
+            cursor: pointer;
+        }
+
+        /* --- OVERLAY --- */
+        #overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #ffb3c1; z-index: 100; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; transition: opacity 1s ease;
+        }
+
+        .tap-heart { font-size: 80px; animation: pulse 1.5s infinite; }
+
+        /* --- THE STAGE --- */
+        .main-stage {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .center-text {
+            text-align: center;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 20px;
+            border-radius: 50%;
+            width: 180px; height: 180px;
+            display: flex; flex-direction: column; justify-content: center;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 0 30px rgba(255, 77, 109, 0.3);
+            border: 2px solid white;
+        }
+
+        .title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2rem;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        /* --- ORBITING CONTAINER --- */
+        #orbitWrapper {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 1s ease;
+        }
+
+        /* This class triggers the actual rotation */
+        .rotating-orbit {
+            animation: mainSpin 15s linear infinite;
+        }
+
+        @keyframes mainSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* --- PHOTO NODES --- */
+        .photo-node {
+            position: absolute;
+            width: 110px; height: 110px;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            overflow: hidden;
+            opacity: 0;
+            transform: scale(0);
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .photo-node img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Counter-rotate the images so they stay upright while orbiting */
+        .rotating-orbit .photo-node img {
+            animation: counterSpin 15s linear infinite;
+        }
+
+        @keyframes counterSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(-360deg); }
+        }
+
+        /* --- CAPTION & EFFECTS --- */
+        #caption {
+            position: fixed; bottom: 8%; width: 100%;
+            text-align: center; color: #590d22;
+            font-size: 1.4rem; font-style: italic; font-weight: 600;
+            z-index: 60; text-shadow: 1px 1px 2px white;
+        }
+
+        #heartContainer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+        .floating-heart { position: absolute; bottom: -50px; animation: floatUp linear infinite; }
+        
+        @keyframes floatUp { to { transform: translateY(-110vh) rotate(360deg); opacity: 0; } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body onclick="handleTap()">
+
+    <div id="overlay">
+        <div class="tap-heart">🎁</div>
+        <h2 style="color: white; font-family: 'Dancing Script'; font-size: 2rem;">A gift from Jugnu... Tap to open!</h2>
+    </div>
+
+    <div id="heartContainer"></div>
+
+    <div class="main-stage">
+        <div class="center-text">
+            <h1 class="title">Happy Birthday Mera Bacha 😘❤️</h1>
+        </div>
+
+        <div id="orbitWrapper">
+            <div class="photo-node" id="pic1"><img src="pic1.jpg.jpg"></div>
+            <div class="photo-node" id="pic2"><img src="pic2.jpg.jpg"></div>
+            <div class="photo-node" id="pic3"><img src="pic3.jpg.jpg"></div>
+            <div class="photo-node" id="pic4"><img src="pic4.jpg.jpg"></div>
+            <div class="photo-node" id="pic5"><img src="pic5.jpg.jpg"></div>
+            <div class="photo-node" id="pic6"><img src="pic6.jpg.jpg"></div>
+        </div>
+    </div>
+
+    <div id="caption"></div>
+
+    <audio id="bgMusic" loop>
+        <source src="music.mp3.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        let tapCount = 0;
+        const totalPics = 6;
+        const orbitWrapper = document.getElementById('orbitWrapper');
+        const captionEl = document.getElementById('caption');
+        const audio = document.getElementById('bgMusic');
+
+        const captions = [
+            "You're the sparkle in my eye... ✨",
+            "The rhythm in my heart... 💓",
+            "My favorite person in the whole world...",
+            "Every day with you is a celebration...",
+            "I promise to always make you smile...",
+            "Happy Birthday! Let's dance through life together! 💃❤️"
+        ];
+
+        function handleTap() {
+            // First tap starts everything
+            if (tapCount === 0) {
+                document.getElementById('overlay').style.opacity = '0';
+                setTimeout(() => document.getElementById('overlay').style.display = 'none', 1000);
+                audio.play();
+                tapCount++;
+                return;
+            }
+
+            // Reveal pictures one by one in a circle
+            if (tapCount <= totalPics) {
+                const pic = document.getElementById(`pic${tapCount}`);
+                
+                // Positioning logic (math to place them in a circle)
+                const angle = (tapCount - 1) * (360 / totalPics);
+                const radius = 180; 
+                const x = Math.cos(angle * Math.PI / 180) * radius;
+                const y = Math.sin(angle * Math.PI / 180) * radius;
+
+                pic.style.opacity = '1';
+                pic.style.transform = `translate(${x}px, ${y}px) scale(1)`;
+                
+                updateCaption(captions[tapCount - 1]);
+
+                // Once the 6th pic is out, start the infinite orbit
+                if (tapCount === totalPics) {
+                    setTimeout(() => {
+                        orbitWrapper.classList.add('rotating-orbit');
+                    }, 1000);
+                }
+                tapCount++;
+            }
+        }
+
+        function updateCaption(txt) {
+            captionEl.style.opacity = 0;
+            setTimeout(() => {
+                captionEl.innerHTML = txt;
+                captionEl.style.transition = "opacity 0.5s";
+                captionEl.style.opacity = 1;
+            }, 300);
+        }
+
+        // Background Hearts
+        function createHeart() {
+            const container = document.getElementById('heartContainer');
+            const heart = document.createElement('div');
+            heart.classList.add('floating-heart');
+            heart.innerHTML = ['❤️', '💖', '✨', '🌸', '🎈'][Math.floor(Math.random() * 5)];
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+            heart.style.animationDuration = (Math.random() * 3 + 4) + 's';
+            container.appendChild(heart);
+            setTimeout(() => heart.remove(), 5000);
+        }
+
+        setInterval(createHeart, 400);
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
